@@ -56,14 +56,14 @@ type orderResponse struct {
 }
 
 // CreateOrder allows a customer to create a new order.
-func CreateOrder(db *sql.DB, cfg CustomerAuthConfig) http.HandlerFunc {
+func CreateOrder(db *sql.DB) http.HandlerFunc {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodPost {
       writeError(w, http.StatusMethodNotAllowed, "method not allowed")
       return
     }
 
-    merchantName, err := authenticateCustomer(r, cfg)
+    merchantName, err := authenticateCustomer(r, db)
     if err != nil {
       writeError(w, http.StatusUnauthorized, "unauthorized")
       return
@@ -92,14 +92,14 @@ func CreateOrder(db *sql.DB, cfg CustomerAuthConfig) http.HandlerFunc {
 }
 
 // ListCustomerOrders allows a customer to list their orders with pagination.
-func ListCustomerOrders(db *sql.DB, cfg CustomerAuthConfig) http.HandlerFunc {
+func ListCustomerOrders(db *sql.DB) http.HandlerFunc {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodGet {
       writeError(w, http.StatusMethodNotAllowed, "method not allowed")
       return
     }
 
-    merchantName, err := authenticateCustomer(r, cfg)
+    merchantName, err := authenticateCustomer(r, db)
     if err != nil {
       writeError(w, http.StatusUnauthorized, "unauthorized")
       return
@@ -128,14 +128,14 @@ func ListCustomerOrders(db *sql.DB, cfg CustomerAuthConfig) http.HandlerFunc {
 }
 
 // GetCustomerOrder returns a single order by ID for the authenticated merchant.
-func GetCustomerOrder(db *sql.DB, cfg CustomerAuthConfig) http.HandlerFunc {
+func GetCustomerOrder(db *sql.DB) http.HandlerFunc {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodGet {
       writeError(w, http.StatusMethodNotAllowed, "method not allowed")
       return
     }
 
-    merchantName, err := authenticateCustomer(r, cfg)
+    merchantName, err := authenticateCustomer(r, db)
     if err != nil {
       writeError(w, http.StatusUnauthorized, "unauthorized")
       return

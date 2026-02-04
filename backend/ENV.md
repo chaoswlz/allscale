@@ -37,14 +37,8 @@ JWT_TTL_MINUTES=60
 - `JWT_ISSUER`：签发者标识
 - `JWT_TTL_MINUTES`：Token 有效期（分钟）
 
-## Customer API Key 配置
+## Customer API Key 存储
 Customer 相关接口使用 API Key 与商户名双重验证，请在请求头中携带 `X-API-Key` 与 `X-Merchant-Name`。
 
-```
-CUSTOMER_API_KEY=replace_with_customer_api_key
-CUSTOMER_MERCHANT_NAME=example_merchant
-```
-
-参数含义：
-- `CUSTOMER_API_KEY`：Customer API Key
-- `CUSTOMER_MERCHANT_NAME`：允许访问的商户名
+API Key 和商户名不再放在环境变量中，而是存储在数据库 `customer_api_keys` 表中。
+需要插入一条有效记录（`active = 1`）才能访问 customer 接口。

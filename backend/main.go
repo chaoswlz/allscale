@@ -30,11 +30,6 @@ func main() {
     log.Fatal(err)
   }
 
-  customerConfig, err := loadCustomerAuthConfig()
-  if err != nil {
-    log.Fatal(err)
-  }
-
   mux := http.NewServeMux()
   mux.HandleFunc("/admin/login", handler.AdminLogin(db, jwtConfig))
   mux.HandleFunc("/admin/stats", handler.AdminStats(db, jwtConfig))
@@ -42,9 +37,9 @@ func main() {
   mux.HandleFunc("/admin/recent-orders", handler.AdminRecentOrders(db, jwtConfig))
   mux.HandleFunc("/admin/order", handler.AdminOrderDetail(db, jwtConfig))
   mux.HandleFunc("/admin/order/status", handler.AdminUpdateOrderStatus(db, jwtConfig))
-  mux.HandleFunc("/customer/createOrder", handler.CreateOrder(db, customerConfig))
-  mux.HandleFunc("/customer/orders", handler.ListCustomerOrders(db, customerConfig))
-  mux.HandleFunc("/customer/order", handler.GetCustomerOrder(db, customerConfig))
+  mux.HandleFunc("/customer/createOrder", handler.CreateOrder(db))
+  mux.HandleFunc("/customer/orders", handler.ListCustomerOrders(db))
+  mux.HandleFunc("/customer/order", handler.GetCustomerOrder(db))
   mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusOK)
@@ -139,23 +134,6 @@ func loadJWTConfig() (handler.AuthConfig, error) {
   }, nil
 }
 
-func loadCustomerAuthConfig() (handler.CustomerAuthConfig, error) {
-  apiKey := os.Getenv("CUSTOMER_API_KEY")
-  if apiKey == "" {
-    return handler.CustomerAuthConfig{}, fmt.Errorf("CUSTOMER_API_KEY is required (see .env.example)")
-  }
-
-  merchantName := os.Getenv("CUSTOMER_MERCHANT_NAME")
-  if merchantName == "" {
-    return handler.CustomerAuthConfig{}, fmt.Errorf("CUSTOMER_MERCHANT_NAME is required (see .env.example)")
-  }
-
-  return handler.CustomerAuthConfig{
-    APIKey:       apiKey,
-    MerchantName: merchantName,
-  }, nil
-}
-
 func ensureTables(db *sql.DB) error {
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
   defer cancel()
@@ -179,6 +157,18 @@ func ensureTables(db *sql.DB) error {
         password_hash VARCHAR(255) NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `,
+    `
+      CREATE TABLE IF NOT EXISTS customer_api_keys (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        merchant_name VARCHAR(128) NOT NULL,
+        api_key VARCHAR(128) NOT NULL,
+        active TINYINT(1) NOT NULL DEFAULT 1,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_api_key (api_key),
+        UNIQUE KEY uniq_merchant_name (merchant_name)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `,
     `
