@@ -11,11 +11,14 @@ import (
   "strings"
   "time"
 
+  "github.com/joho/godotenv"
   _ "github.com/go-sql-driver/mysql"
   "sarah-project-backend/handler"
 )
 
 func main() {
+  _ = godotenv.Load()
+
   db, err := openDB()
   if err != nil {
     log.Fatal(err)
