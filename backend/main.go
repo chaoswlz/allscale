@@ -51,7 +51,7 @@ func main() {
 
   server := &http.Server{
     Addr:         ":8080",
-    Handler:      mux,
+    Handler:      withCORS(mux),
     ReadTimeout:  5 * time.Second,
     WriteTimeout: 10 * time.Second,
     IdleTimeout:  60 * time.Second,
@@ -61,6 +61,19 @@ func main() {
   if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
     log.Fatal(err)
   }
+}
+
+func withCORS(next http.Handler) http.Handler {
+  return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+    w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key, X-Merchant-Name")
+    if r.Method == http.MethodOptions {
+      w.WriteHeader(http.StatusNoContent)
+      return
+    }
+    next.ServeHTTP(w, r)
+  })
 }
 
 func openDB() (*sql.DB, error) {
