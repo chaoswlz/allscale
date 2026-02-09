@@ -13,6 +13,7 @@ type OrderDTO struct {
   TransactionAsset   string         `db:"transaction_asset"`
   TXID               string         `db:"txid"`
   Amount             sql.NullFloat64 `db:"amount"`
+  Email              string         `db:"email"`
   BeneficiaryName    string         `db:"beneficiary_name"`
   BankCountry        string         `db:"bank_country"`
   BankName           string         `db:"bank_name"`

@@ -96,6 +96,12 @@
               </div>
             </div>
             <div>
+              <div class="label">EMAIL</div>
+              <div class="value">
+                {{ selectedOrder.email }}
+              </div>
+            </div>
+            <div>
               <div class="label">BANK COUNTRY</div>
               <div class="value">
                 {{ selectedOrder.bankCountry }}
@@ -385,6 +391,7 @@ const openDetail = async (row) => {
     asset: row.asset || "-",
     amount: row.amount || "-",
     txid: row.txid || "-",
+    email: row.email || "-",
     beneficiaryName: row.beneficiaryName || "-",
     bankCountry: row.bankCountry || "-",
     bankName: row.bankName || "-",
@@ -409,6 +416,7 @@ const openDetail = async (row) => {
       asset: row.asset || "USDT",
       amount: row.amount || "12,500.00",
       txid: "0x7a23c...9b21",
+      email: "finance@techventures.com",
       beneficiaryName: "TechVentures LLC",
       bankCountry: "United States",
       bankName: "Chase Bank International",
@@ -505,6 +513,7 @@ const mapAdminOrderDetail = (order) => ({
   asset: order.transaction_asset || order.asset || "-",
   amount: order.amount != null ? Number(order.amount).toLocaleString() : "-",
   txid: order.txid || "-",
+  email: order.email || "-",
   beneficiaryName: order.beneficiary_name || "-",
   bankCountry: order.bank_country || "-",
   bankName: order.bank_name || "-",

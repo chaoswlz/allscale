@@ -195,6 +195,7 @@ func ensureTables(db *sql.DB) error {
         transaction_asset ENUM('USDT', 'USDC') NOT NULL,
         txid VARCHAR(128) NOT NULL,
         amount DECIMAL(18, 8) NULL,
+        email VARCHAR(128) NOT NULL,
         beneficiary_name VARCHAR(128) NOT NULL,
         bank_country ENUM('Canada', 'United States') NOT NULL,
         bank_name VARCHAR(128) NOT NULL,

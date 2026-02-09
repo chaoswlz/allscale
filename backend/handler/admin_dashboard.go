@@ -45,6 +45,7 @@ type adminOrderDetail struct {
   TransactionAsset   string    `json:"transaction_asset"`
   TXID              string    `json:"txid"`
   Amount            *float64  `json:"amount"`
+  Email             string    `json:"email"`
   BeneficiaryName   string    `json:"beneficiary_name"`
   BankCountry       string    `json:"bank_country"`
   BankName          string    `json:"bank_name"`
@@ -400,7 +401,7 @@ func loadAdminOrderDetail(ctx context.Context, db *sql.DB, orderID int64) (admin
 
   row := db.QueryRowContext(ctx, `
     SELECT id, merchant_name, transaction_network, transaction_asset, txid, amount,
-           beneficiary_name, bank_country, bank_name, iban, swift, reference_note, status, created_at
+           email, beneficiary_name, bank_country, bank_name, iban, swift, reference_note, status, created_at
     FROM orders
     WHERE id = ?
     LIMIT 1
@@ -413,6 +414,7 @@ func loadAdminOrderDetail(ctx context.Context, db *sql.DB, orderID int64) (admin
     &order.TransactionAsset,
     &order.TXID,
     &amount,
+    &order.Email,
     &order.BeneficiaryName,
     &order.BankCountry,
     &order.BankName,

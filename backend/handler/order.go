@@ -16,6 +16,7 @@ type createOrderRequest struct {
   TransactionAsset   string   `json:"transaction_asset"`
   TXID               string   `json:"txid"`
   Amount             *float64 `json:"amount"`
+  Email              string   `json:"email"`
   BeneficiaryName    string   `json:"beneficiary_name"`
   BankCountry        string   `json:"bank_country"`
   BankName           string   `json:"bank_name"`
@@ -45,6 +46,7 @@ type orderResponse struct {
   TransactionAsset   string   `json:"transaction_asset"`
   TXID               string   `json:"txid"`
   Amount             *float64 `json:"amount"`
+  Email              string   `json:"email"`
   BeneficiaryName    string   `json:"beneficiary_name"`
   BankCountry        string   `json:"bank_country"`
   BankName           string   `json:"bank_name"`
@@ -171,6 +173,7 @@ func validateCreateOrder(req createOrderRequest) error {
   if req.TransactionNetwork == "" ||
     req.TransactionAsset == "" ||
     req.TXID == "" ||
+    req.Email == "" ||
     req.BeneficiaryName == "" ||
     req.BankCountry == "" ||
     req.BankName == "" ||
@@ -191,6 +194,10 @@ func validateCreateOrder(req createOrderRequest) error {
 
   if req.Amount != nil && *req.Amount < 0 {
     return errBadRequest("amount must be non-negative")
+  }
+
+  if !strings.Contains(req.Email, "@") {
+    return errBadRequest("invalid email")
   }
 
   return nil
@@ -217,6 +224,7 @@ func insertOrder(ctx context.Context, db *sql.DB, merchantName string, req creat
       transaction_asset,
       txid,
       amount,
+      email,
       beneficiary_name,
       bank_country,
       bank_name,
@@ -231,6 +239,7 @@ func insertOrder(ctx context.Context, db *sql.DB, merchantName string, req creat
     req.TransactionAsset,
     req.TXID,
     amount,
+    req.Email,
     req.BeneficiaryName,
     req.BankCountry,
     req.BankName,
@@ -261,7 +270,7 @@ func listOrdersByMerchant(ctx context.Context, db *sql.DB, merchantName string, 
 
   offset := (page - 1) * pageSize
   rows, err := db.QueryContext(ctx, `
-    SELECT id, transaction_network, transaction_asset, txid, amount, beneficiary_name,
+    SELECT id, transaction_network, transaction_asset, txid, amount, email, beneficiary_name,
            bank_country, bank_name, iban, swift, reference_note, status, created_at
     FROM orders
     WHERE merchant_name = ?
@@ -286,6 +295,7 @@ func listOrdersByMerchant(ctx context.Context, db *sql.DB, merchantName string, 
       &order.TransactionAsset,
       &order.TXID,
       &amount,
+      &order.Email,
       &order.BeneficiaryName,
       &order.BankCountry,
       &order.BankName,
@@ -323,7 +333,7 @@ func getOrderByID(ctx context.Context, db *sql.DB, merchantName string, orderID 
   )
 
   row := db.QueryRowContext(ctx, `
-    SELECT id, transaction_network, transaction_asset, txid, amount, beneficiary_name,
+    SELECT id, transaction_network, transaction_asset, txid, amount, email, beneficiary_name,
            bank_country, bank_name, iban, swift, reference_note, status, created_at
     FROM orders
     WHERE merchant_name = ? AND id = ?
@@ -335,6 +345,7 @@ func getOrderByID(ctx context.Context, db *sql.DB, merchantName string, orderID 
     &order.TransactionAsset,
     &order.TXID,
     &amount,
+    &order.Email,
     &order.BeneficiaryName,
     &order.BankCountry,
     &order.BankName,
